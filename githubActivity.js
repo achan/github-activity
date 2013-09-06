@@ -6,9 +6,10 @@ var githubActivity = (function() {
 
       var output = '';
       for (var key in events.data) {
-        var eventType = events.data[key].type;
+        var event = events.data[key];
+        var eventType = event.type;
         if (templates[eventType])
-          output += Mustache.render(templates[eventType]);
+          output += Mustache.render(templates[eventType], event);
       }
 
       return output === '' ? Mustache.render(templates.NoEvents) : output;

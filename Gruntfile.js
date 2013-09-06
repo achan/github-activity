@@ -5,7 +5,10 @@ module.exports = function (grunt) {
         src: '*.js',
         options: {
           specs: 'spec/*Spec.js',
-          vendor: [ 'node_modules/mustache/mustache.js' ]
+          vendor: [
+            'node_modules/mustache/mustache.js',
+            'node_modules/moment/moment.js'
+          ]
         }
       }
     }

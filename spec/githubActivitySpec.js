@@ -99,5 +99,15 @@ describe('GitHub Activity', function () {
       githubActivity.formatFeed(templates, { data: [pushEvent] });
       expect(Mustache.render.mostRecentCall.args[1].created_at_in_words).toContain(' ago');
     });
+
+    it('should enhance view to add function to format sha', function () {
+      var customEvent = {
+        type: 'PushEvent',
+        payload: { commits: [{ sha: '123456789653' }] }
+      };
+
+      templates.PushEvent = '{{#payload.commits}}{{#formatSha}}{{sha}}{{/formatSha}}{{/payload.commits}}';
+      expect(githubActivity.formatFeed(templates, { data: [customEvent] })).toBe('1234567');
+    });
   });
 });

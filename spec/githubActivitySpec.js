@@ -1,5 +1,5 @@
 describe('GitHub Activity', function () {
-  var templates;
+  var options;
   var pushEvent  = {
     id: "1818882042",
     type: "PushEvent",
@@ -64,39 +64,59 @@ describe('GitHub Activity', function () {
   };
 
   beforeEach(function() {
-    templates = {
-      NoEvents: 'No Events',
-      CreateEvent: 'Create Event',
-      PushEvent: 'Push Event repo name: {{repo.name}}'
+    script = {};
+    doc = { createElement: function (elementName) {} };
+    options = {
+      templates: {
+        NoEvents: 'No Events',
+        CreateEvent: 'Create Event',
+        PushEvent: 'Push Event repo name: {{repo.name}}'
+      },
+      username: 'testuser',
+      doc: doc
     };
+
+    spyOn(doc, 'createElement').andReturn(script);
+    githubActivity.requestActivity(options);
   });
 
-  describe('formatFeed()', function () {
+  describe('requestActivity()', function () {
+    it('requests github activity for the username specified', function () {
+      expect(doc.createElement).toHaveBeenCalledWith('script');
+      expect(script.src).toContain('https://api.github.com/users/testuser/events');
+    });
+
+    it('sets showActivity() as the callback', function () {
+      expect(script.src).toContain('?callback=githubActivity.showActivity');
+    });
+  });
+
+  describe('showActivity()', function () {
     it('should indicate when there has been no recent activity', function () {
-      expect(githubActivity.formatFeed(templates)).toBe('No Events');
+      expect(githubActivity.showActivity()).toBe('No Events');
     });
 
     it('should render supported events', function () {
-      expect(githubActivity.formatFeed(templates, buildResponse('CreateEvent'))).toBe('Create Event');
+      expect(githubActivity.showActivity(buildResponse('CreateEvent'))).toBe('Create Event');
     });
 
     it('should render view variables', function () {
-      expect(githubActivity.formatFeed(templates, { data: [pushEvent] })).toContain('achan&#x2F;ignoramos');
+      expect(githubActivity.showActivity({ data: [pushEvent] })).toContain('achan&#x2F;ignoramos');
     });
 
     it('should skip over unsupported events', function () {
-      expect(githubActivity.formatFeed(templates, buildResponse(['CreateEvent', 'UnsupportedEvent'])))
+      expect(githubActivity.showActivity(buildResponse(['CreateEvent', 'UnsupportedEvent'])))
         .toBe('Create Event');
     });
 
     it('should show No Events template if feed only contains unsupported events', function () {
-      expect(githubActivity.formatFeed(templates, buildResponse(['UnsupportedEvent', 'UnsupportedEvent'])))
+      expect(githubActivity.showActivity(buildResponse(['UnsupportedEvent', 'UnsupportedEvent'])))
         .toBe('No Events');
     });
 
     it('should enhance view with created_at_in_words', function () {
       spyOn(Mustache, 'render');
-      githubActivity.formatFeed(templates, { data: [pushEvent] });
+      githubActivity.showActivity({ data: [pushEvent] });
       expect(Mustache.render.mostRecentCall.args[1].created_at_in_words).toContain(' ago');
     });
 
@@ -106,8 +126,10 @@ describe('GitHub Activity', function () {
         payload: { commits: [{ sha: '123456789653' }] }
       };
 
-      templates.PushEvent = '{{#payload.commits}}{{#formatSha}}{{sha}}{{/formatSha}}{{/payload.commits}}';
-      expect(githubActivity.formatFeed(templates, { data: [customEvent] })).toBe('1234567');
+      var pushTemplate = '{{#payload.commits}}{{#formatSha}}{{sha}}{{/formatSha}}{{/payload.commits}}';
+      options.templates.PushEvent = pushTemplate;
+      githubActivity.requestActivity(options);
+      expect(githubActivity.showActivity({ data: [customEvent] })).toBe('1234567');
     });
   });
 });

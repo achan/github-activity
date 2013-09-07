@@ -23,19 +23,25 @@ var githubActivity = (function() {
     return output === '' ? Mustache.render(templates.NoEvents) : output;
   };
 
+  var onCompleteCallback = function (html) {
+    _options.onCompleteCallback(html);
+  };
+
   var activity = {
     showActivity: function(response) {
       if (!response)
-        return Mustache.render(_options.templates.NoEvents);
+        return onCompleteCallback(Mustache.render(_options.templates.NoEvents));
 
-      return formatFeed(response.data);
+      return onCompleteCallback(formatFeed(response.data));
     },
 
     requestActivity: function(options) {
       _options = options;
-      _options.doc.createElement('script').src = 'https://api.github.com/users/' +
-                                                 _options.username +
-                                                 '/events?callback=githubActivity.showActivity';
+      var script = _options.doc.createElement('script');
+      script.src = 'https://api.github.com/users/' +
+                   _options.username +
+                   '/events?callback=githubActivity.showActivity';
+      _options.doc.body.appendChild(script);
     }
   };
 

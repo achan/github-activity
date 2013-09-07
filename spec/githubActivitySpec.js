@@ -1,5 +1,5 @@
 describe('GitHub Activity', function () {
-  var options;
+  var options, script, body, doc, callback;
   var pushEvent  = {
     id: "1818882042",
     type: "PushEvent",
@@ -65,7 +65,12 @@ describe('GitHub Activity', function () {
 
   beforeEach(function() {
     script = {};
-    doc = { createElement: function (elementName) {} };
+    body = { appendChild: function (child) {} };
+    doc = {
+      createElement: function (elementName) {},
+      body: body 
+    };
+    callback = function (html) {};
     options = {
       templates: {
         NoEvents: 'No Events',
@@ -73,10 +78,13 @@ describe('GitHub Activity', function () {
         PushEvent: 'Push Event repo name: {{repo.name}}'
       },
       username: 'testuser',
-      doc: doc
+      doc: doc,
+      onCompleteCallback: callback
     };
 
     spyOn(doc, 'createElement').andReturn(script);
+    spyOn(body, 'appendChild');
+    spyOn(options, 'onCompleteCallback');
     githubActivity.requestActivity(options);
   });
 
@@ -89,29 +97,36 @@ describe('GitHub Activity', function () {
     it('sets showActivity() as the callback', function () {
       expect(script.src).toContain('?callback=githubActivity.showActivity');
     });
+
+    it('appends script to body', function () {
+      expect(body.appendChild).toHaveBeenCalledWith(script);
+    });
   });
 
   describe('showActivity()', function () {
     it('should indicate when there has been no recent activity', function () {
-      expect(githubActivity.showActivity()).toBe('No Events');
+      githubActivity.showActivity();
+      expect(options.onCompleteCallback).toHaveBeenCalledWith('No Events');
     });
 
     it('should render supported events', function () {
-      expect(githubActivity.showActivity(buildResponse('CreateEvent'))).toBe('Create Event');
+      githubActivity.showActivity(buildResponse('CreateEvent'));
+      expect(options.onCompleteCallback).toHaveBeenCalledWith('Create Event');
     });
 
     it('should render view variables', function () {
-      expect(githubActivity.showActivity({ data: [pushEvent] })).toContain('achan&#x2F;ignoramos');
+      githubActivity.showActivity({ data: [pushEvent] });
+      expect(options.onCompleteCallback.mostRecentCall.args[0]).toContain('achan&#x2F;ignoramos');
     });
 
     it('should skip over unsupported events', function () {
-      expect(githubActivity.showActivity(buildResponse(['CreateEvent', 'UnsupportedEvent'])))
-        .toBe('Create Event');
+      githubActivity.showActivity(buildResponse(['CreateEvent', 'UnsupportedEvent']));
+      expect(options.onCompleteCallback).toHaveBeenCalledWith('Create Event');
     });
 
     it('should show No Events template if feed only contains unsupported events', function () {
-      expect(githubActivity.showActivity(buildResponse(['UnsupportedEvent', 'UnsupportedEvent'])))
-        .toBe('No Events');
+      githubActivity.showActivity(buildResponse(['UnsupportedEvent', 'UnsupportedEvent']));
+      expect(options.onCompleteCallback).toHaveBeenCalledWith('No Events');
     });
 
     it('should enhance view with created_at_in_words', function () {
@@ -129,7 +144,8 @@ describe('GitHub Activity', function () {
       var pushTemplate = '{{#payload.commits}}{{#formatSha}}{{sha}}{{/formatSha}}{{/payload.commits}}';
       options.templates.PushEvent = pushTemplate;
       githubActivity.requestActivity(options);
-      expect(githubActivity.showActivity({ data: [customEvent] })).toBe('1234567');
+      githubActivity.showActivity({ data: [customEvent] });
+      expect(options.onCompleteCallback.mostRecentCall.args[0]).toBe('1234567');
     });
   });
 });

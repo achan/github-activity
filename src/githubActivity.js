@@ -1,26 +1,34 @@
 var githubActivity = (function() {
   var _options = {};
   var formatFeed = function (events) {
-    templates = _options.templates;
-
     var output = '';
-    var formatSha = function () {
-      return function (text, render) {
-        return render(text).substring(0, 7);
-      };
-    };
 
-    for (var key in events) {
-      var event = events[key];
-      var eventType = event.type;
-      if (templates[eventType]) {
-        event.formatSha = formatSha;
-        event.created_at_in_words = moment(event.created_at).fromNow();
-        output += Mustache.render(templates[eventType], event);
-      }
+    for (var key in events)
+      output += buildOutputForEvent(events[key]);
+
+    return output === '' ? Mustache.render(_options.templates.NoEvents) : output;
+  };
+
+  var formatShaHelper = function () {
+    return function (text, render) {
+      return render(text).substring(0, 7);
+    };
+  };
+
+  var buildOutputForEvent = function (event) {
+    var eventType = event.type, templates = _options.templates;
+
+    if (templates[eventType]) {
+      augmentEvent(event, { formatSha: formatShaHelper, moment: moment });
+      return Mustache.render(templates[eventType], event);
     }
 
-    return output === '' ? Mustache.render(templates.NoEvents) : output;
+    return '';
+  };
+
+  var augmentEvent = function (event, helpers) {
+    event.formatSha = helpers.formatSha;
+    event.created_at_in_words = helpers.moment(event.created_at).fromNow();
   };
 
   var onCompleteCallback = function (html) {

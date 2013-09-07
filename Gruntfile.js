@@ -1,13 +1,24 @@
 module.exports = function (grunt) {
   grunt.initConfig({
+    pkg: grunt.file.readJSON('package.json'),
+    jshint: {
+      files: ['Gruntfile.js', 'src/*.js']
+    },
+    uglify: {
+      githubActivity: {
+        files: {
+          'dist/githubActivity.min.js': 'githubActivity.js'
+        }
+      }
+    },
     jasmine: {
       githubActivity: {
-        src: '*.js',
+        src: 'src/*.js',
         options: {
           specs: 'spec/*Spec.js',
           vendor: [
-            'node_modules/mustache/mustache.js',
-            'node_modules/moment/moment.js'
+            'bower_components/mustache/mustache.js',
+            'bower_components/momentjs/moment.js'
           ]
         }
       }
@@ -15,6 +26,8 @@ module.exports = function (grunt) {
   });
 
   grunt.loadNpmTasks('grunt-contrib-jasmine');
+  grunt.loadNpmTasks('grunt-contrib-jshint');
+  grunt.loadNpmTasks('grunt-contrib-uglify');
 
-  grunt.registerTask('default', ['jasmine']);
+  grunt.registerTask('default', ['jshint', 'jasmine']);
 };

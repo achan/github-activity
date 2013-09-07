@@ -3,12 +3,8 @@
   "version": "0.0.1",
   "devDependencies": {
     "grunt": "~0.4.1",
-    "grunt-contrib-jshint": "~0.6.3",
+    "grunt-contrib-jshint": "~0.6.4",
     "grunt-contrib-jasmine": "~0.5.2",
-    "mustache": "~0.7.2",
-    "moment": "~2.1.0"
-  },
-  "engines": {
-    "node": ">=0.8.0"
+    "grunt-contrib-uglify": "~0.2.4"
   }
 }

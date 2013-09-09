@@ -1,5 +1,5 @@
 var githubActivity = (function() {
-  var _options = {};
+  var _options = false;
 
   var setOptions = function (options) {
     _options = options;
@@ -53,6 +53,9 @@ var githubActivity = (function() {
 
   var activity = {
     showActivity: function(response) {
+      if (!getOptions())
+        throw 'Must requestActivity before showActivity: getOptions';
+
       if (!response) {
         var output = Mustache.render(getOptions().templates.NoEvents);
         return onCompleteCallback(output);
@@ -66,6 +69,10 @@ var githubActivity = (function() {
       setOptions(options);
       script.src = buildFetchEventsUrl(options.username);
       options.doc.body.appendChild(script);
+    },
+
+    reset: function() {
+      setOptions(null);
     }
   };
 

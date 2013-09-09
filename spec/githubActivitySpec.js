@@ -25,6 +25,10 @@ describe('GitHub Activity', function () {
     spyOn(options, 'onCompleteCallback');
   });
 
+  afterEach(function () {
+    githubActivity.reset();
+  });
+
   describe('requestActivity()', function () {
     beforeEach(function () {
       githubActivity.requestActivity(options);
@@ -44,7 +48,19 @@ describe('GitHub Activity', function () {
     });
   });
 
+  describe('reset()', function () {
+    it('should require you to requestActivity() again', function () {
+      githubActivity.requestActivity(options);
+      githubActivity.reset();
+      expect(githubActivity.showActivity).toThrow();
+    });
+  });
+
   describe('showActivity()', function () {
+    it('throws exception if requestActivity has not been fired', function () {
+      expect(githubActivity.showActivity).toThrow();
+    });
+
     describe('properly setup', function () {
       var buildResponse = function (eventType) {
         var data = [];

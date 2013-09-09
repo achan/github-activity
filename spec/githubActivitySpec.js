@@ -23,10 +23,13 @@ describe('GitHub Activity', function () {
     spyOn(doc, 'createElement').andReturn(script);
     spyOn(body, 'appendChild');
     spyOn(options, 'onCompleteCallback');
-    githubActivity.requestActivity(options);
   });
 
   describe('requestActivity()', function () {
+    beforeEach(function () {
+      githubActivity.requestActivity(options);
+    });
+
     it('requests github activity for the username specified', function () {
       expect(doc.createElement).toHaveBeenCalledWith('script');
       expect(script.src).toContain('https://api.github.com/users/testuser/events');
@@ -42,88 +45,94 @@ describe('GitHub Activity', function () {
   });
 
   describe('showActivity()', function () {
-    var buildResponse = function (eventType) {
-      var data = [];
+    describe('properly setup', function () {
+      var buildResponse = function (eventType) {
+        var data = [];
 
-      if (eventType instanceof Array) {
-        for (var i in eventType) {
-          data.push({ type: eventType[i] });
-        }
-      } else {
-        data.push({ type: eventType });
-      }
-
-      return { data: data };
-    };
-
-    var pushEvent  = {
-      type: "PushEvent",
-      actor: { login: "achan", avatar_url: "http://example.com/avatar.jpg" },
-      repo: { name: "achan/ignoramos" },
-      payload: {
-        size: 2,
-        distinct_size: 2,
-        ref: "refs/heads/master",
-        commits: [
-          {
-          sha: "abbb394160808619329950ac311290d371b00251",
-          author: { email: "example@gmail.com", name: "Amos Chan" },
-          message: "example commit message",
-        },
-        {
-          sha: "37b13593646cbb070b8707325980b33658dc3eac",
-          author: {
-            email: "example@gmail.com", name: "Amos Chan" },
-            message: "example commit msg 2"
+        if (eventType instanceof Array) {
+          for (var i in eventType) {
+            data.push({ type: eventType[i] });
           }
-        ]
-      },
-      public: true,
-      created_at: "2013-09-01T02:26:39Z"
-    };
+        } else {
+          data.push({ type: eventType });
+        }
 
-    it('should indicate when there has been no recent activity', function () {
-      githubActivity.showActivity();
-      expect(options.onCompleteCallback).toHaveBeenCalledWith('No Events');
-    });
-
-    it('should render supported events', function () {
-      githubActivity.showActivity(buildResponse('CreateEvent'));
-      expect(options.onCompleteCallback).toHaveBeenCalledWith('Create Event');
-    });
-
-    it('should render view variables', function () {
-      githubActivity.showActivity({ data: [pushEvent] });
-      expect(options.onCompleteCallback.mostRecentCall.args[0]).toContain('achan&#x2F;ignoramos');
-    });
-
-    it('should skip over unsupported events', function () {
-      githubActivity.showActivity(buildResponse(['CreateEvent', 'UnsupportedEvent']));
-      expect(options.onCompleteCallback).toHaveBeenCalledWith('Create Event');
-    });
-
-    it('should show No Events template if feed only contains unsupported events', function () {
-      githubActivity.showActivity(buildResponse(['UnsupportedEvent', 'UnsupportedEvent']));
-      expect(options.onCompleteCallback).toHaveBeenCalledWith('No Events');
-    });
-
-    it('should enhance view with created_at_in_words', function () {
-      spyOn(Mustache, 'render');
-      githubActivity.showActivity({ data: [pushEvent] });
-      expect(Mustache.render.mostRecentCall.args[1].created_at_in_words).toContain(' ago');
-    });
-
-    it('should enhance view to add function to format sha', function () {
-      var customEvent = {
-        type: 'PushEvent',
-        payload: { commits: [{ sha: '123456789653' }] }
+        return { data: data };
       };
 
-      var pushTemplate = '{{#payload.commits}}{{#formatSha}}{{sha}}{{/formatSha}}{{/payload.commits}}';
-      options.templates.PushEvent = pushTemplate;
-      githubActivity.requestActivity(options);
-      githubActivity.showActivity({ data: [customEvent] });
-      expect(options.onCompleteCallback.mostRecentCall.args[0]).toBe('1234567');
+      var pushEvent  = {
+        type: "PushEvent",
+        actor: { login: "achan", avatar_url: "http://example.com/avatar.jpg" },
+        repo: { name: "achan/ignoramos" },
+        payload: {
+          size: 2,
+          distinct_size: 2,
+          ref: "refs/heads/master",
+          commits: [
+            {
+            sha: "abbb394160808619329950ac311290d371b00251",
+            author: { email: "example@gmail.com", name: "Amos Chan" },
+            message: "example commit message",
+          },
+          {
+            sha: "37b13593646cbb070b8707325980b33658dc3eac",
+            author: {
+              email: "example@gmail.com", name: "Amos Chan" },
+              message: "example commit msg 2"
+            }
+          ]
+        },
+        public: true,
+        created_at: "2013-09-01T02:26:39Z"
+      };
+
+      beforeEach(function () {
+        githubActivity.requestActivity(options);
+      });
+
+      it('should indicate when there has been no recent activity', function () {
+        githubActivity.showActivity();
+        expect(options.onCompleteCallback).toHaveBeenCalledWith('No Events');
+      });
+
+      it('should render supported events', function () {
+        githubActivity.showActivity(buildResponse('CreateEvent'));
+        expect(options.onCompleteCallback).toHaveBeenCalledWith('Create Event');
+      });
+
+      it('should render view variables', function () {
+        githubActivity.showActivity({ data: [pushEvent] });
+        expect(options.onCompleteCallback.mostRecentCall.args[0]).toContain('achan&#x2F;ignoramos');
+      });
+
+      it('should skip over unsupported events', function () {
+        githubActivity.showActivity(buildResponse(['CreateEvent', 'UnsupportedEvent']));
+        expect(options.onCompleteCallback).toHaveBeenCalledWith('Create Event');
+      });
+
+      it('should show No Events template if feed only contains unsupported events', function () {
+        githubActivity.showActivity(buildResponse(['UnsupportedEvent', 'UnsupportedEvent']));
+        expect(options.onCompleteCallback).toHaveBeenCalledWith('No Events');
+      });
+
+      it('should enhance view with created_at_in_words', function () {
+        spyOn(Mustache, 'render');
+        githubActivity.showActivity({ data: [pushEvent] });
+        expect(Mustache.render.mostRecentCall.args[1].created_at_in_words).toContain(' ago');
+      });
+
+      it('should enhance view to add function to format sha', function () {
+        var customEvent = {
+          type: 'PushEvent',
+          payload: { commits: [{ sha: '123456789653' }] }
+        };
+
+        var pushTemplate = '{{#payload.commits}}{{#formatSha}}{{sha}}{{/formatSha}}{{/payload.commits}}';
+        options.templates.PushEvent = pushTemplate;
+        githubActivity.requestActivity(options);
+        githubActivity.showActivity({ data: [customEvent] });
+        expect(options.onCompleteCallback.mostRecentCall.args[0]).toBe('1234567');
+      });
     });
   });
 });

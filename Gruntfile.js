@@ -7,7 +7,7 @@ module.exports = function (grunt) {
     uglify: {
       githubActivity: {
         files: {
-          'dist/githubActivity.min.js': 'githubActivity.js'
+          'dist/githubActivity.min.js': 'src/githubActivity.js'
         }
       }
     },
@@ -29,6 +29,6 @@ module.exports = function (grunt) {
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-uglify');
 
-  grunt.registerTask('default', ['jshint', 'jasmine']);
+  grunt.registerTask('default', ['jshint', 'jasmine', 'uglify']);
   grunt.registerTask('test', ['jshint', 'jasmine']);
 };

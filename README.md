@@ -60,7 +60,20 @@ All that's left to do is fire a GitHub Activity request with `requestActivity()`
     </script>
 
 ## Bower
-You can install this project with the [Bower](http://bower.io) package manager with the command `bower install github-activity`.
+You can install this project and all its dependencies with the [Bower](http://bower.io) package manager with the command `bower install github-activity`. To manually install, see the Requirements section.
+
+## Requirements
+- [Mustache 0.7.2](https://github.com/janl/mustache.js/releases/tag/0.7.2)
+- [Moment.js 2.1.0](https://github.com/moment/moment/releases/tag/2.1.0)
 
 ## Limitations
 Since this plugin is using GitHub's public API via JSONP, it is subjected to GitHub's unauthenticated session API rate limit of 60 requests an hour.
+
+## Contributions
+Before sending a pull request, ensure that:
+
+- all unit tests pass (and add some if necessary)
+- JavaScript is linted with JSHint
+- JavaScript is minified with uglify
+
+All these things can be done by using the `grunt` command at the root of the project. If you aren't familiar with the [Grunt task runner](http://gruntjs.com), see their [Getting Started](http://gruntjs.com/getting-started) tutorial.

@@ -1,6 +1,8 @@
 github-activity [![Build Status](https://travis-ci.org/achan/github-activity.png?branch=master)](https://travis-ci.org/achan/github-activity)
 ===============
 
+This library displays the activity feed of a given GitHub user.
+
 ## Usage
 Create a container for your activity feed along with a loading indicator that will be displayed while waiting for GitHub's response.
 

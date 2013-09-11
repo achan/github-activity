@@ -1,4 +1,10 @@
 var githubActivity = (function() {
+  var _templates  = {
+    NoEvents: '<div>There has been no recent activity.</div>',
+    PushEvent: '<div class="event push-event"> <div class="timestamp"><i class="icon-code"></i> {{created_at_in_words}}</div> <div class="event-description"> <a href="http://github.com/{{actor.login}}"><strong>{{actor.login}}</strong></a> pushed to <a href="http://github.com/{{repo.name}}"><strong>{{repo.name}}</strong></a> </div> <ul class="commits"> {{#payload.commits}} <li class="commit"> <a class="sha" href="https://github.com/{{repo.name}}/commit/{{sha}}">{{#formatSha}}{{sha}}{{/formatSha}}</a> {{message}} </li> {{/payload.commits}} </ul> </div>',
+    CreateEvent: '<div class="event create-event"> <div class="timestamp"><i class="icon-plus"></i> {{created_at_in_words}}</div> <div class="event-description"> <a href="http://github.com/{{actor.login}}"><strong>{{actor.login}}</strong></a> created repository <a href="http://github.com/{{repo.name}}"><strong>{{repo.name}}</strong></a> </div> </div>'
+  };
+
   var _options = false;
 
   var setOptions = function (options) {
@@ -65,7 +71,11 @@ var githubActivity = (function() {
     },
 
     requestActivity: function(options) {
+      if (!options.templates)
+        options.templates = _templates;
+
       var script = options.doc.createElement('script');
+
       setOptions(options);
       script.src = buildFetchEventsUrl(options.username);
       options.doc.body.appendChild(script);

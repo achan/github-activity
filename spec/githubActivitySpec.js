@@ -30,21 +30,41 @@ describe('GitHub Activity', function () {
   });
 
   describe('requestActivity()', function () {
-    beforeEach(function () {
-      githubActivity.requestActivity(options);
+    afterEach(function () {
+      githubActivity.reset();
     });
 
-    it('requests github activity for the username specified', function () {
-      expect(doc.createElement).toHaveBeenCalledWith('script');
-      expect(script.src).toContain('https://api.github.com/users/testuser/events');
+    describe('with custom templates', function () {
+      beforeEach(function () {
+        githubActivity.requestActivity(options);
+      });
+
+      it('requests github activity for the username specified', function () {
+        expect(doc.createElement).toHaveBeenCalledWith('script');
+        expect(script.src).toContain('https://api.github.com/users/testuser/events');
+      });
+
+      it('sets showActivity() as the callback', function () {
+        expect(script.src).toContain('?callback=githubActivity.showActivity');
+      });
+
+      it('appends script to body', function () {
+        expect(body.appendChild).toHaveBeenCalledWith(script);
+      });
     });
 
-    it('sets showActivity() as the callback', function () {
-      expect(script.src).toContain('?callback=githubActivity.showActivity');
-    });
+    describe('with no templates provided', function () {
+      it('uses default templates', function () {
+        var noTemplates = {
+          username: 'testuser',
+          doc: doc,
+          onCompleteCallback: callback
+        };
 
-    it('appends script to body', function () {
-      expect(body.appendChild).toHaveBeenCalledWith(script);
+        githubActivity.requestActivity(noTemplates);
+
+        expect(noTemplates.templates).toBeDefined();
+      });
     });
   });
 

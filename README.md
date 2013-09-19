@@ -3,6 +3,9 @@ github-activity [![Build Status](https://travis-ci.org/achan/github-activity.png
 
 This library displays the activity feed of a given GitHub user.
 
+## Demo
+See this library [in action](http://amos.pw/commits) using the built-in templates.
+
 ## Usage
 Create a container for your activity feed along with a loading indicator that will be displayed while waiting for GitHub's response.
 

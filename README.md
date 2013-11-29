@@ -1,4 +1,4 @@
-github-activity [![Build Status](https://travis-ci.org/achan/github-activity.png?branch=master)](https://travis-ci.org/achan/github-activity)
+github-activity [![Build Status](https://travis-ci.org/achan/github-activity.png?branch=master)](https://travis-ci.org/achan/github-activity) [![Code Climate](https://codeclimate.com/github/achan/github-activity.png)](https://codeclimate.com/github/achan/github-activity)
 ===============
 
 This library displays the activity feed of a given GitHub user.
